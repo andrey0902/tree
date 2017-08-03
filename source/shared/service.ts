@@ -22,4 +22,14 @@ export class Service {
     public getElemById(id) {
         return document.getElementById(id);
     }
+    public changeIdObject(arr: any[], id: number, newId: number) {
+        console.log('OLDid', id, 'NEW', newId);
+        arr.forEach((elem) => {
+            if (+elem.id === +id) {
+                console.log(elem)
+                elem.parent_id = newId;
+            }
+        })
+        console.log(arr);
+    }
 }
