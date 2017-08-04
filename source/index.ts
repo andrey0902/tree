@@ -1,10 +1,12 @@
 import 'normalize.css';
 import './sass/style.scss'
-import {Data} from './data/data';
-import {ToggleShow} from './toggleShow';
-import {AddItem} from './admin/addItem';
-import {Service} from "./shared/service";
 
+import { ToggleShow } from './toggleShow';
+import { AddItem } from './admin/addItem';
+import {CategoryModel, ICategory} from './model/category-model';
+import { ServiceStorage } from './shared/service-storage/service-storage';
+import { Service } from "./shared/service";
+import { Data } from './data/data';
 
 let toggleShow = new ToggleShow();
 
@@ -12,31 +14,65 @@ class CreateList {
     private root = [];
     public childs = {};
     private service: Service;
-    private addItem;
+    private rootDiv;
     private ulId;
     private domElement;
-    private listLastId;
+    private form: Element;
+    readonly rootCategory: number = 0;
+    private serviceStorage: ServiceStorage;
+    private list: CategoryModel[];
 
-    constructor(private list, service:Service, domElement) {
+    constructor(list: CategoryModel[], service: Service, serviceStorage: ServiceStorage, domElement: string) {
+        this.serviceStorage = serviceStorage;
         this.service = service;
+        this.isStorage (list);
+        this.form = this.service.searchOne('.add-category');
         this.domElement = domElement;
-        this.createChildList(this.list);
-        this.listLastId = this.list.length;
-        this.service.searchOne(`.${domElement}`).appendChild(this.tree(this.childs));
-        this.isAdmin(domElement);
 
-        this.addLi();
-        this.delete();
-        this.dragStart();
+        this.rootDiv = this.service.searchOne(`.${domElement}`);
 
+        this.render();
+        this.addActionToRootButton();
+
+    }
+    private isStorage (arr: CategoryModel[]) {
+        let list = this.serviceStorage.getData('cat');
+        console.log('storage', list)
+        if(list.length) {
+            this.list = list;
+            return;
+        }
+        this.list = arr;
     }
 
     private createId() {
-        return this.listLastId++;
+        if(!this.list.length) {
+            return 1;
+        }
+        let arr = this.list;
+        arr.sort((a: CategoryModel | any, b: CategoryModel) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+        return arr[arr.length-1].id + 1;
     }
 
     public toggleForm() {
-        this.service.searchOne('.add-category').classList.toggle('show');
+        let form = this.service.searchOne('.add-category');
+        console.log(form.classList.contains('show'))
+        if(form.classList.contains('show') ) {
+            form.classList.remove('show');
+            return;
+        }
+        form.classList.add('show');
+
+        (this.form.children[1] as HTMLElement).focus();
+    }
+
+    private closeForm() {
+        this.form.classList.remove('show');
+    }
+    private openForm() {
+        console.log(this.form)
+        this.form.classList.add('show');
+        (this.form.children[1] as HTMLElement).focus();
     }
 
     public readValue(val?) {
@@ -49,31 +85,33 @@ class CreateList {
 
     private test2 = (e) => {
         let value: string;
+        value = this.readValue();
         e.target.removeEventListener('click', this.test2)
 
-        this.service.searchOne('.add-category').classList.toggle('show');
-        value = this.readValue();
-        let obj = {
-            'id': this.createId(),
-            category: value,
-            parent_id: this.ulId
-        };
+       if(value !== '') {
+           this.closeForm();
+           let obj: CategoryModel = new CategoryModel(this.createId(), value, this.ulId);
+           this.readValue(true);
+           this.list.push(obj)
+           this.render();
+       }
 
-        this.listLastId++;
-        this.readValue(true);
-        this.list.push(obj)
-        this.render();
     }
 
     private render() {
-        this.service.searchOne(`.${this.domElement}`).innerHTML = '';
+        this.serviceStorage.setData('cat', this.list);
+        this.rootDiv.innerHTML = '';
         this.childs = {};
         this.createChildList(this.list);
-        this.service.searchOne(`.${this.domElement}`).appendChild(this.tree(this.childs));
+        if(this.list.length){
+            this.rootDiv.appendChild(this.tree(this.childs));
+        }
+
         this.isAdmin(this.domElement);
         this.delete();
         this.addLi();
         this.dragStart();
+
         toggleShow.addEvent(toggleShow.searchAllElements('.root-li'), 'click', function (e) {
             e.stopPropagation()
             if (e.target.children) {
@@ -89,23 +127,25 @@ class CreateList {
         let dragged;
         this.service.searchAllElements('[draggable="true"]').forEach((elem) => {
 
-            elem.addEventListener('dragend', (e) => {
-                e.stopPropagation()
+            elem.addEventListener('dragend', (e: Event) => {
+                e.stopPropagation();
                 console.log('что вставляю', 'куда вставляю')
-                e.target.style.color = 'green';
+              /*  e.target.style.color = 'green';*/
             });
         /*    /!* собитие срабатывает когда  объект покидае зону в которую может быть помещен*!/*/
             elem.addEventListener('dragleave', (e) => {
-                e.target.style.color = 'black';
-                e.target.style.border = '';
+                (e.target as HTMLElement).style.color = 'black';
+                (e.target as HTMLElement).style.fontWeight = '400';
             });
           /*  /!*при перетаскивании куда подсвечивае синим цветом   dragover  dragenter*!/*/
             elem.addEventListener('dragover', (e) => {
                  e.preventDefault();
-                e.target.style.color = 'darkblue';
-                e.target.style.border = '1px solid black';
+                (e.target as HTMLElement).style.color = 'darkblue';
+                (e.target as HTMLElement).style.fontWeight = '700';
+
+               /* e.target.style.border = '1px solid black';*/
             })
-           elem.addEventListener('drop', (e) => {
+           elem.addEventListener('drop', (e: any) => {
                let newId: number;
                let oldId: number;
                 e.preventDefault();
@@ -118,18 +158,15 @@ class CreateList {
                     this.render()
                 }
 
-
-                e.target.style.color = '#2ca03f';
             }, false);
-           elem.addEventListener('dragend', (e) => {
-                e.target.style.color = 'blue';
+           elem.addEventListener('dragend', (e: any) => {
+               /* e.target.style.color = 'blue';*/
             })
-            elem.addEventListener('dragstart', (e) => {
+            elem.addEventListener('dragstart', (e: any) => {
                 e.stopPropagation()
-                console.log('element', e.target.dataset.id);
                 dragged = e.target;
                 e.dataTransfer.setData("element", e.target.dataset.id);
-                e.target.style.color = 'red';
+
             })
         })
     }
@@ -149,16 +186,12 @@ class CreateList {
 
                 return +elem.parent_id === +id
             })) {
-
-            /*   console.log('parent_id have');*/
             let int = null;
             let nexId = null;
             while (int != -1) {
-
                 int = arr.findIndex((elem) => {
                     if (+elem.parent_id === +id) {
                         nexId = elem.id;
-                        console.log(nexId);
                         return true;
                     };
                 });
@@ -172,20 +205,11 @@ class CreateList {
 
     private delete() {
         this.service.searchAllElements('.dec').forEach((element) => {
-            /* console.log(element)*/
             this.service.addEvent(element, 'click', (e) => {
                 this.ulId = element.classList[1];
-
                 this.recur(this.list, this.ulId);
                 this.delById(this.list, this.ulId);
                 this.render();
-/*                this.service.searchOne(`.${this.domElement}`).innerHTML = '';
-                this.childs = {};
-                this.createChildList(this.list);
-                this.service.searchOne(`.${this.domElement}`).appendChild(this.tree(this.childs));
-                this.isAdmin(this.domElement);
-                this.addLi();
-                this.delete()*/
 
             })
         })
@@ -199,13 +223,44 @@ class CreateList {
         let newAddList = this.service.searchAllElements('.inc');
         newAddList.forEach((elem) => {
             this.service.addEvent(elem, 'click', () => {
-                this.toggleForm()
+                /*this.toggleForm()*/
+                this.openForm();
                 this.ulId = elem.classList[1];
                 this.saveLi(this.test2);
             })
         })
     }
 
+    private actionRootAdd = (e) => {
+        e.preventDefault();
+        console.log('what in line', this.readValue() === '');
+        if(this.readValue()!== '') {
+            let rootData: CategoryModel = new CategoryModel(this.createId(), this.readValue(), this.rootCategory);
+
+            e.target.removeEventListener('click', this.actionRootAdd);
+            this.list.push(rootData);
+
+            this.render();
+            this.readValue(true);
+            /*this.toggleForm();*/
+            this.closeForm();
+        }
+
+
+    };
+
+    public addActionToRootButton() {
+        let rootIdCategory;
+        let rootButton = this.service.searchOne('.root-add');
+        this.service.addEvent(rootButton, 'click', (e) => {
+            if(e.target.dataset.id) {
+                rootIdCategory = e.target.dataset.id;
+                /*this.toggleForm();*/
+                this.openForm();
+                this.service.searchOne('.save').addEventListener('click', this.actionRootAdd);
+            }
+        })
+    }
     public isAdmin(selector) {
         if (selector === 'admin') {
             this.service.searchAllElements('li').forEach((elementLi: any) => {
@@ -217,14 +272,14 @@ class CreateList {
 
     private createAdd(Id?) {
 
-        let buttonInc = document.createElement('span');
+        let buttonInc: any = document.createElement('span');
         buttonInc.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>';
         buttonInc.classList = (Id) ? 'inc ' + Id : 'inc-li';
         return buttonInc;
     }
 
     private createdel(Id?) {
-        let buttonDec = document.createElement('span');
+        let buttonDec: any = document.createElement('span');
         buttonDec.innerHTML = '<i class="fa fa-minus" aria-hidden="true"></i>';
         buttonDec.classList = (Id) ? 'dec ' + Id : 'dec-li';
         return buttonDec;
@@ -235,7 +290,7 @@ class CreateList {
             return;
         }
         let ul: any = document.createElement('ul');
-        // ul.dataset.id = 0;
+        ul.dataset.id = 0;
         ul.draggable = true;
         for (let i = 0; i < arr[parent_id].length; i++) {
             ul.id = parent_id;
@@ -280,8 +335,9 @@ class CreateList {
 }
 
 /*let myClass = new CreateList(Data, Service, 'site');*/
-let service = new Service()
-let adminClass = new CreateList(Data, service, 'admin');
+let service = new Service();
+let serviceStorage = new ServiceStorage()
+let adminClass = new CreateList(Data, service, serviceStorage,'admin');
 
 /*let addItem = new AddItem(Service);*/
 

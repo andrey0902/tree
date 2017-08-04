@@ -1,6 +1,4 @@
-.show{
-  display: none;
-}
+
 html{
   font-size: 16px;
   line-height: 1.2;
@@ -25,7 +23,11 @@ ul{
 }
 li{
   width: 15vw;
-  /*border-bottom: 1px solid darkblue;*/
+  padding-left: 20px;
+  border-left: 1px solid #8a888b;
+}
+li:before{
+  content:''; display:block; border-bottom:solid 1px #999; position:absolute; width:18px; height:11px; left:0; top:0;
 }
 .admin{
   width: 20vw;
@@ -33,7 +35,7 @@ li{
 .admin > ul {
 
   width: 20vw;
-  background: #7bacff;
+/*  background: #7bacff;*/
   margin-left: 20px;
 }
 
@@ -69,4 +71,41 @@ li > li {
 }
 ul li span, ul li span i {
   border: none !important;
+}
+li.root-li{
+  cursor: pointer;
+}
+li{
+  cursor: default;
+}
+.root-add{
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 3rem;
+  width: 3rem;
+  line-height: 1rem;
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  background: #2196f3;
+  color: #fff ;
+  margin-bottom: .5rem;
+  display: inline-block;
+  transition: .3s;
+}
+.root-add:hover{
+  box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+.root-add:focus{
+ outline: none;
+}
+.block{
+  margin-left: 2rem;
+}
+.add-category{
+  display: none;
+}
+.show{
+  display: block;
 }
