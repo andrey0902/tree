@@ -116,6 +116,7 @@ class CreateList {
             e.stopPropagation()
             if (e.target.children) {
                 if (e.target.querySelector('ul')) {
+                    e.target.classList.toggle('toggle');
                     e.target.querySelector('ul').classList.toggle('hide');
                 }
 
