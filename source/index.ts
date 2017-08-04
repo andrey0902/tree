@@ -38,7 +38,7 @@ class CreateList {
     private isStorage (arr: CategoryModel[]) {
         let list = this.serviceStorage.getData('cat');
         console.log('storage', list)
-        if(list.length) {
+        if(list) {
             this.list = list;
             return;
         }
