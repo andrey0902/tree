@@ -1,17 +1,14 @@
 import { CategoryModel } from './../../model/category-model';
 export class ServiceStorage {
-    private _data;
-    constructor() {
 
-    }
     public getData(key: string) {
         return  this.createList(key);
     }
 
     public setData (key: string, data: any) {
-        localStorage.setItem(key, this.converToString(data));
+        localStorage.setItem(key, this.convertToString(data));
     }
-    private converToString(arr: any) {
+    private convertToString(arr: any) {
         return JSON.stringify(arr);
     }
 
