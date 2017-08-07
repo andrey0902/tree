@@ -86,4 +86,36 @@ export class Service {
         return ul;
     }
 
+    public createDom(arr, parentId = 0) {
+        let result;
+        let ul: any = document.createElement('ul');
+        ul.dataset.id = 0;
+        ul.id = parentId;
+        ul.draggable = true;
+
+        arr.forEach((elem) => {
+
+            if (+elem.parent_id == +parentId) {
+                let li = document.createElement('li');
+
+                li.draggable = true;
+                li.dataset.id = elem.id;
+                li.innerHTML = elem.category;
+
+
+
+                li.innerHTML = elem.category;
+                if (this.createDom(arr, elem.id).children.length) {
+                    let dul = this.createDom(arr, elem.id);
+                    dul.draggable = true;
+                    this.addClassToElement(dul, 'child-ul');
+                    li.appendChild(dul);
+                }
+
+                ul.appendChild(li);
+            }
+        })
+        return ul;
+    }
+
 }

@@ -32,6 +32,7 @@ class CreateList {
         this.rootDiv = this.service.searchOne(`.${domElement}`);
         this.render();
         this.addActionToRootButton();
+        console.log(this.service.createDom(this.list))
 
     }
 
@@ -132,7 +133,6 @@ class CreateList {
                     this.service.changeIdObject(this.list, oldId, newId);
                     this.render()
                 }
-
             }, false);
 
             elem.addEventListener('dragstart', (e: any) => {
@@ -258,7 +258,6 @@ class CreateList {
 
 }
 
-
 let service = new Service();
 let serviceStorage = new ServiceStorage()
 
@@ -269,5 +268,24 @@ let adminClass = new CreateList(Data, service, serviceStorage, 'admin');
 
 
 
+let test = (arr, id = 0) => {
+    let result;
+    let ul = document.createElement('ul');
+    arr.forEach((elem) => {
+        if(+elem.parent_id == + id) {
+            let li = document.createElement('li');
+            li.innerHTML = elem.category;
+            if(test(arr, elem.id).children.length){
+                li.appendChild(test(arr, elem.id));
+            }
 
+            ul.appendChild(li);
+                   }
+    })
+    return ul;
+}
 
+ let a = document.querySelector('.test')
+console.log('root', test(Data))
+
+a.appendChild(test(Data))

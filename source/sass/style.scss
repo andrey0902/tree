@@ -154,3 +154,14 @@ li{
   top: 5px;
   z-index: 55;
 }
+
+.root-li:after{
+  content: '';
+  display: block;
+  border-bottom: solid 1px #999;
+  position: absolute;
+  width: 18px;
+  height: 11px;
+  left: 0;
+  top: 0;
+}
