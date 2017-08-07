@@ -54,7 +54,7 @@ class CreateList {
         return arr[arr.length-1].id + 1;
     }
 
-    public toggleForm() {
+/*    public toggleForm() {
         let form = this.service.searchOne('.add-category');
         console.log(form.classList.contains('show'))
         if(form.classList.contains('show') ) {
@@ -64,7 +64,7 @@ class CreateList {
         form.classList.add('show');
 
         (this.form.children[1] as HTMLElement).focus();
-    }
+    }*/
 
     private closeForm() {
         this.form.classList.remove('show');
@@ -84,11 +84,11 @@ class CreateList {
     }
 
     private test2 = (e) => {
-        let value: string;
-        value = this.readValue();
-        e.target.removeEventListener('click', this.test2)
+        let value: string  = this.readValue();;
 
        if(value !== '') {
+
+           e.target.removeEventListener('click', this.test2)
            this.closeForm();
            let obj: CategoryModel = new CategoryModel(this.createId(), value, this.ulId);
            this.readValue(true);
@@ -96,6 +96,19 @@ class CreateList {
            this.render();
        }
 
+    }
+    private toggleColaps() {
+
+                this.service.addEvent(this.service.searchAllElements('.root-li'), 'click', function (e) {
+                    e.stopPropagation()
+                    if (e.target.children) {
+                        if (e.target.querySelector('ul')) {
+                            e.target.classList.toggle('toggle');
+                            e.target.querySelector('ul').classList.toggle('hide');
+                        }
+
+                    }
+                });
     }
 
     private render() {
@@ -111,17 +124,7 @@ class CreateList {
         this.delete();
         this.addLi();
         this.dragStart();
-
-        toggleShow.addEvent(toggleShow.searchAllElements('.root-li'), 'click', function (e) {
-            e.stopPropagation()
-            if (e.target.children) {
-                if (e.target.querySelector('ul')) {
-                    e.target.classList.toggle('toggle');
-                    e.target.querySelector('ul').classList.toggle('hide');
-                }
-
-            }
-        });
+        this.toggleColaps();
     }
 
     private dragStart() {
@@ -210,21 +213,27 @@ class CreateList {
                 this.ulId = element.classList[1];
                 this.recur(this.list, this.ulId);
                 this.delById(this.list, this.ulId);
+                this.readValue(true);
+                this.removeAddEventListener(this.service.searchOne('.save'), 'click', this.test2);
+                this.closeForm();
                 this.render();
 
             })
         })
     }
+    private removeAddEventListener(elem: Element, action, fun) {
+        elem.removeEventListener(action, fun);
+}
 
     private saveLi(fun) {
         this.service.addEvent(this.service.searchOne('.save'), 'click', fun)
     }
 
     public addLi() {
+        console.log(this.readValue())
         let newAddList = this.service.searchAllElements('.inc');
         newAddList.forEach((elem) => {
             this.service.addEvent(elem, 'click', () => {
-                /*this.toggleForm()*/
                 this.openForm();
                 this.ulId = elem.classList[1];
                 this.saveLi(this.test2);
@@ -234,16 +243,13 @@ class CreateList {
 
     private actionRootAdd = (e) => {
         e.preventDefault();
-        console.log('what in line', this.readValue() === '');
         if(this.readValue()!== '') {
             let rootData: CategoryModel = new CategoryModel(this.createId(), this.readValue(), this.rootCategory);
 
             e.target.removeEventListener('click', this.actionRootAdd);
             this.list.push(rootData);
-
             this.render();
             this.readValue(true);
-            /*this.toggleForm();*/
             this.closeForm();
         }
 
@@ -265,13 +271,13 @@ class CreateList {
     public isAdmin(selector) {
         if (selector === 'admin') {
             this.service.searchAllElements('li').forEach((elementLi: any) => {
-                elementLi.insertBefore(this.createdel(elementLi.dataset.id), elementLi.childNodes[1])
-                elementLi.appendChild(this.createAdd(elementLi.dataset.id))
+                elementLi.insertBefore(this.createdeleteButton(elementLi.dataset.id), elementLi.childNodes[1])
+                elementLi.appendChild(this.createAddButton(elementLi.dataset.id))
             })
         }
     }
 
-    private createAdd(Id?) {
+    private createAddButton(Id?) {
 
         let buttonInc: any = document.createElement('span');
         buttonInc.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>';
@@ -279,7 +285,7 @@ class CreateList {
         return buttonInc;
     }
 
-    private createdel(Id?) {
+    private createdeleteButton(Id?) {
         let buttonDec: any = document.createElement('span');
         buttonDec.innerHTML = '<i class="fa fa-minus" aria-hidden="true"></i>';
         buttonDec.classList = (Id) ? 'dec ' + Id : 'dec-li';
