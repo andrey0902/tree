@@ -32,4 +32,19 @@ export class Service {
             buttonInc.classList = (id) ?`${classIsId} ${id}`   : classNotId;
             return buttonInc;
     }
+    public addClassToElement(domElement: Element, className: string[] | string){
+        if(className instanceof Array) {
+            domElement.classList.add(...className);
+            return;
+        }
+        domElement.classList.add(className);
+    }
+    public createDomElement(name: string, className?: string[] | string) {
+        let element =  document.createElement(name);
+        if(className){
+            this.addClassToElement(element, className);
+        }
+        return element;
+    }
+
 }

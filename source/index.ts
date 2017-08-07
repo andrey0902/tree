@@ -77,7 +77,6 @@ class CreateList {
 
     private saveCategoryActions = (e) => {
         let value: string = this.readValue();
-        ;
 
         if (value !== '') {
             e.target.removeEventListener('click', this.saveCategoryActions)
@@ -97,10 +96,8 @@ class CreateList {
                 if (e.target.querySelector('ul')) {
                     e.target.classList.toggle('toggle');
                     e.target.querySelector('ul').classList.toggle('hide');
-                }
-                ;
-            }
-            ;
+                };
+            };
         });
     }
 
@@ -153,9 +150,7 @@ class CreateList {
                 }
 
             }, false);
-            elem.addEventListener('dragend', (e: any) => {
-                /* e.target.style.color = 'blue';*/
-            })
+
             elem.addEventListener('dragstart', (e: any) => {
                 e.stopPropagation();
                 dragged = e.target;
@@ -184,8 +179,7 @@ class CreateList {
                     if (+elem.parent_id === +id) {
                         nexId = elem.id;
                         return true;
-                    }
-                    ;
+                    };
                 });
                 if (int != -1) {
                     arr.splice(int, 1);
@@ -205,9 +199,8 @@ class CreateList {
                 this.removeAddEventListener(this.service.searchOne('.save'), 'click', this.saveCategoryActions);
                 this.closeForm();
                 this.render();
-
-            })
-        })
+            });
+        });
     }
 
     private removeAddEventListener(elem: Element, action, fun) {
@@ -219,7 +212,6 @@ class CreateList {
     }
 
     public addLi() {
-        console.log(this.readValue())
         let newAddList = this.service.searchAllElements('.inc');
         newAddList.forEach((elem) => {
             this.service.addEvent(elem, 'click', () => {
@@ -260,7 +252,6 @@ class CreateList {
             this.service.searchAllElements('li').forEach((elementLi: any) => {
                 elementLi.insertBefore(this.service.createButton('fa-minus', 'dec', 'dec-li', elementLi.dataset.id), elementLi.childNodes[1]);
                 elementLi.appendChild(this.service.createButton(' fa-plus', 'inc', 'inc-li', elementLi.dataset.id),);
-
             })
         }
     }
@@ -269,21 +260,21 @@ class CreateList {
         if (!(parentId in arr)) {
             return;
         }
-        let ul: any = document.createElement('ul');
+        let ul: any = this.service.createDomElement('ul');
         ul.dataset.id = 0;
         ul.draggable = true;
         for (let i = 0; i < arr[parentId].length; i++) {
             ul.id = parentId;
-            let li: any = document.createElement('li');
+            let li: any = this.service.createDomElement('li');
             li.draggable = true;
             li.dataset.id = arr[parentId][i].id;
             li.innerHTML = arr[parentId][i].category;
             let dul: any = this.tree(arr, arr[parentId][i].id);
             if (dul) {
                 dul.draggable = true;
-                dul.classList = 'child-ul';
+                this.service.addClassToElement(dul, 'child-ul');
                 li.appendChild(dul);
-                li.classList = 'root-li';
+                this.service.addClassToElement(li, 'root-li');
             }
             ul.appendChild(li);
         }
@@ -314,17 +305,19 @@ class CreateList {
 
 }
 
-/*let myClass = new CreateList(Data, Service, 'site');*/
+
 let service = new Service();
 let serviceStorage = new ServiceStorage()
+
+/*let myClass = new CreateList(Data, service, serviceStorage, 'site');*/
+
 let adminClass = new CreateList(Data, service, serviceStorage, 'admin');
 
 /*let addItem = new AddItem(Service);*/
 
 
-toggleShow.addEvent(toggleShow.searchAllElements('.add'), 'click', function (e) {
+/*toggleShow.addEvent(toggleShow.searchAllElements('.add'), 'click', function (e) {
 
     (toggleShow.searchOne('.add-category') as any).classList.toggle('show')
-})
-// console.log('root',root);
-// console.log( 'childs', childs);
+})*/
+
