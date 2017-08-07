@@ -23,7 +23,7 @@ export class Service {
     public changeIdObject(arr: any[], id: number, newId: number) {
         arr.forEach((elem) => {
             if (+elem.id === +id) {
-                elem.parent_id = newId;
+                elem.parentId = newId;
             }
         })
     }
@@ -61,61 +61,29 @@ export class Service {
         list.sort((a: CategoryModel | any, b: CategoryModel) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
         return list[list.length - 1].id + 1;
     }
-    public tree(arr, parentId = 0) {
-        if (!(parentId in arr)) {
-            return;
-        }
-        let ul: any = this.createDomElement('ul');
-        ul.dataset.id = 0;
-        ul.draggable = true;
-        for (let i = 0; i < arr[parentId].length; i++) {
-            ul.id = parentId;
-            let li: any = this.createDomElement('li');
-            li.draggable = true;
-            li.dataset.id = arr[parentId][i].id;
-            li.innerHTML = arr[parentId][i].category;
-            let dul: any = this.tree(arr, arr[parentId][i].id);
-            if (dul) {
-                dul.draggable = true;
-                this.addClassToElement(dul, 'child-ul');
-                li.appendChild(dul);
-                this.addClassToElement(li, 'root-li');
-            }
-            ul.appendChild(li);
-        }
-        return ul;
-    }
 
     public createDom(arr, parentId = 0) {
-        let result;
-        let ul: any = document.createElement('ul');
+        let ul: any = this.createDomElement('ul');
         ul.dataset.id = 0;
         ul.id = parentId;
         ul.draggable = true;
 
         arr.forEach((elem) => {
-
-            if (+elem.parent_id == +parentId) {
-                let li = document.createElement('li');
-
+            if (+elem.parentId == +parentId) {
+                let li = this.createDomElement('li');
                 li.draggable = true;
                 li.dataset.id = elem.id;
-                li.innerHTML = elem.category;
-
-
-
                 li.innerHTML = elem.category;
                 if (this.createDom(arr, elem.id).children.length) {
                     let dul = this.createDom(arr, elem.id);
                     dul.draggable = true;
                     this.addClassToElement(dul, 'child-ul');
                     li.appendChild(dul);
+                    this.addClassToElement(li, 'root-li');
                 }
-
                 ul.appendChild(li);
             }
-        })
+        });
         return ul;
     }
-
 }
