@@ -1,12 +1,13 @@
 import 'normalize.css';
 import './sass/style.scss'
 
-import { ToggleShow } from './toggleShow';
-import { AddItem } from './admin/addItem';
+import {ToggleShow} from './toggleShow';
+import {AddItem} from './admin/addItem';
 import {CategoryModel, ICategory} from './model/category-model';
-import { ServiceStorage } from './shared/service-storage/service-storage';
-import { Service } from "./shared/service";
-import { Data } from './data/data';
+import {ServiceStorage} from './shared/service-storage/service-storage';
+import {Service} from './shared/service';
+import {Data} from './data/data';
+
 
 let toggleShow = new ToggleShow();
 
@@ -22,23 +23,25 @@ class CreateList {
     private serviceStorage: ServiceStorage;
     private list: CategoryModel[];
 
-    constructor(list: CategoryModel[], service: Service, serviceStorage: ServiceStorage, domElement: string) {
+    constructor(list: CategoryModel[],
+                service: Service,
+                serviceStorage: ServiceStorage,
+                domElement: string) {
+
         this.serviceStorage = serviceStorage;
         this.service = service;
-        this.isStorage (list);
+        this.isStorage(list);
         this.form = this.service.searchOne('.add-category');
         this.domElement = domElement;
-
         this.rootDiv = this.service.searchOne(`.${domElement}`);
-
         this.render();
         this.addActionToRootButton();
 
     }
-    private isStorage (arr: CategoryModel[]) {
+
+    private isStorage(arr: CategoryModel[]) {
         let list = this.serviceStorage.getData('cat');
-        console.log('storage', list)
-        if(list) {
+        if (list) {
             this.list = list;
             return;
         }
@@ -46,29 +49,18 @@ class CreateList {
     }
 
     private createId() {
-        if(!this.list.length) {
+        if (!this.list.length) {
             return 1;
         }
         let arr = this.list;
         arr.sort((a: CategoryModel | any, b: CategoryModel) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
-        return arr[arr.length-1].id + 1;
+        return arr[arr.length - 1].id + 1;
     }
-
-/*    public toggleForm() {
-        let form = this.service.searchOne('.add-category');
-        console.log(form.classList.contains('show'))
-        if(form.classList.contains('show') ) {
-            form.classList.remove('show');
-            return;
-        }
-        form.classList.add('show');
-
-        (this.form.children[1] as HTMLElement).focus();
-    }*/
 
     private closeForm() {
         this.form.classList.remove('show');
     }
+
     private openForm() {
         console.log(this.form)
         this.form.classList.add('show');
@@ -83,32 +75,33 @@ class CreateList {
         return value;
     }
 
-    private test2 = (e) => {
-        let value: string  = this.readValue();;
+    private saveCategoryActions = (e) => {
+        let value: string = this.readValue();
+        ;
 
-       if(value !== '') {
-
-           e.target.removeEventListener('click', this.test2)
-           this.closeForm();
-           let obj: CategoryModel = new CategoryModel(this.createId(), value, this.ulId);
-           this.readValue(true);
-           this.list.push(obj)
-           this.render();
-       }
+        if (value !== '') {
+            e.target.removeEventListener('click', this.saveCategoryActions)
+            this.closeForm();
+            let obj: CategoryModel = new CategoryModel(this.createId(), value, this.ulId);
+            this.readValue(true);
+            this.list.push(obj)
+            this.render();
+        }
 
     }
+
     private toggleColaps() {
-
-                this.service.addEvent(this.service.searchAllElements('.root-li'), 'click', function (e) {
-                    e.stopPropagation()
-                    if (e.target.children) {
-                        if (e.target.querySelector('ul')) {
-                            e.target.classList.toggle('toggle');
-                            e.target.querySelector('ul').classList.toggle('hide');
-                        }
-
-                    }
-                });
+        this.service.addEvent(this.service.searchAllElements('.root-li'), 'click', function (e) {
+            e.stopPropagation()
+            if (e.target.children) {
+                if (e.target.querySelector('ul')) {
+                    e.target.classList.toggle('toggle');
+                    e.target.querySelector('ul').classList.toggle('hide');
+                }
+                ;
+            }
+            ;
+        });
     }
 
     private render() {
@@ -116,7 +109,7 @@ class CreateList {
         this.rootDiv.innerHTML = '';
         this.childs = {};
         this.createChildList(this.list);
-        if(this.list.length){
+        if (this.list.length) {
             this.rootDiv.appendChild(this.tree(this.childs));
         }
 
@@ -134,52 +127,47 @@ class CreateList {
             elem.addEventListener('dragend', (e: Event) => {
                 e.stopPropagation();
                 console.log('что вставляю', 'куда вставляю')
-              /*  e.target.style.color = 'green';*/
             });
-        /*    /!* собитие срабатывает когда  объект покидае зону в которую может быть помещен*!/*/
+            /*    /!* собитие срабатывает когда  объект покидае зону в которую может быть помещен*!/*/
             elem.addEventListener('dragleave', (e) => {
                 (e.target as HTMLElement).style.color = 'black';
                 (e.target as HTMLElement).style.fontWeight = '400';
             });
-          /*  /!*при перетаскивании куда подсвечивае синим цветом   dragover  dragenter*!/*/
+            /*  /!*при перетаскивании куда подсвечивае синим цветом   dragover  dragenter*!/*/
             elem.addEventListener('dragover', (e) => {
-                 e.preventDefault();
+                e.preventDefault();
                 (e.target as HTMLElement).style.color = 'darkblue';
                 (e.target as HTMLElement).style.fontWeight = '700';
-
-               /* e.target.style.border = '1px solid black';*/
             })
-           elem.addEventListener('drop', (e: any) => {
-               let newId: number;
-               let oldId: number;
+            elem.addEventListener('drop', (e: any) => {
+                let newId: number;
+                let oldId: number;
                 e.preventDefault();
-                oldId = e.dataTransfer.getData("element");
+                oldId = e.dataTransfer.getData('element');
                 newId = e.target.dataset.id;
                 console.log('что вставляю', oldId, 'куда вставляю', e.target.dataset.id);
-                if( e.target.dataset.id || +e.target.dataset.id == 0) {
+                if (e.target.dataset.id || +e.target.dataset.id == 0) {
                     e.target.appendChild(dragged);
                     this.service.changeIdObject(this.list, oldId, newId);
                     this.render()
                 }
 
             }, false);
-           elem.addEventListener('dragend', (e: any) => {
-               /* e.target.style.color = 'blue';*/
+            elem.addEventListener('dragend', (e: any) => {
+                /* e.target.style.color = 'blue';*/
             })
             elem.addEventListener('dragstart', (e: any) => {
-                e.stopPropagation()
+                e.stopPropagation();
                 dragged = e.target;
-                e.dataTransfer.setData("element", e.target.dataset.id);
+                e.dataTransfer.setData('element', e.target.dataset.id);
 
             })
         })
     }
 
-
-
     private delById(arr, id) {
         let a = arr.findIndex((elem) => {
-            return +elem.id === +id
+            return +elem.id === +id;
         });
         arr.splice(a, 1);
     }
@@ -187,8 +175,7 @@ class CreateList {
     private recur(arr, id) {
 
         if (arr.find((elem) => {
-
-                return +elem.parent_id === +id
+                return +elem.parent_id === +id;
             })) {
             let int = null;
             let nexId = null;
@@ -197,7 +184,8 @@ class CreateList {
                     if (+elem.parent_id === +id) {
                         nexId = elem.id;
                         return true;
-                    };
+                    }
+                    ;
                 });
                 if (int != -1) {
                     arr.splice(int, 1);
@@ -214,16 +202,17 @@ class CreateList {
                 this.recur(this.list, this.ulId);
                 this.delById(this.list, this.ulId);
                 this.readValue(true);
-                this.removeAddEventListener(this.service.searchOne('.save'), 'click', this.test2);
+                this.removeAddEventListener(this.service.searchOne('.save'), 'click', this.saveCategoryActions);
                 this.closeForm();
                 this.render();
 
             })
         })
     }
+
     private removeAddEventListener(elem: Element, action, fun) {
         elem.removeEventListener(action, fun);
-}
+    }
 
     private saveLi(fun) {
         this.service.addEvent(this.service.searchOne('.save'), 'click', fun)
@@ -236,76 +225,60 @@ class CreateList {
             this.service.addEvent(elem, 'click', () => {
                 this.openForm();
                 this.ulId = elem.classList[1];
-                this.saveLi(this.test2);
-            })
-        })
+                this.saveLi(this.saveCategoryActions);
+            });
+        });
     }
 
     private actionRootAdd = (e) => {
         e.preventDefault();
-        if(this.readValue()!== '') {
+        if (this.readValue() !== '') {
             let rootData: CategoryModel = new CategoryModel(this.createId(), this.readValue(), this.rootCategory);
-
             e.target.removeEventListener('click', this.actionRootAdd);
             this.list.push(rootData);
             this.render();
             this.readValue(true);
             this.closeForm();
         }
-
-
     };
 
     public addActionToRootButton() {
         let rootIdCategory;
         let rootButton = this.service.searchOne('.root-add');
         this.service.addEvent(rootButton, 'click', (e) => {
-            if(e.target.dataset.id) {
+            if (e.target.dataset.id) {
                 rootIdCategory = e.target.dataset.id;
-                /*this.toggleForm();*/
                 this.openForm();
                 this.service.searchOne('.save').addEventListener('click', this.actionRootAdd);
             }
         })
     }
+
     public isAdmin(selector) {
         if (selector === 'admin') {
+            //tslint:disable-next-line
             this.service.searchAllElements('li').forEach((elementLi: any) => {
-                elementLi.insertBefore(this.createdeleteButton(elementLi.dataset.id), elementLi.childNodes[1])
-                elementLi.appendChild(this.createAddButton(elementLi.dataset.id))
+                elementLi.insertBefore(this.service.createButton('fa-minus', 'dec', 'dec-li', elementLi.dataset.id), elementLi.childNodes[1]);
+                elementLi.appendChild(this.service.createButton(' fa-plus', 'inc', 'inc-li', elementLi.dataset.id),);
+
             })
         }
     }
 
-    private createAddButton(Id?) {
-
-        let buttonInc: any = document.createElement('span');
-        buttonInc.innerHTML = '<i class="fa fa-plus" aria-hidden="true"></i>';
-        buttonInc.classList = (Id) ? 'inc ' + Id : 'inc-li';
-        return buttonInc;
-    }
-
-    private createdeleteButton(Id?) {
-        let buttonDec: any = document.createElement('span');
-        buttonDec.innerHTML = '<i class="fa fa-minus" aria-hidden="true"></i>';
-        buttonDec.classList = (Id) ? 'dec ' + Id : 'dec-li';
-        return buttonDec;
-    }
-
-    public tree(arr, parent_id = 0) {
-        if (!(parent_id in arr)) {
+    public tree(arr, parentId = 0) {
+        if (!(parentId in arr)) {
             return;
         }
         let ul: any = document.createElement('ul');
         ul.dataset.id = 0;
         ul.draggable = true;
-        for (let i = 0; i < arr[parent_id].length; i++) {
-            ul.id = parent_id;
+        for (let i = 0; i < arr[parentId].length; i++) {
+            ul.id = parentId;
             let li: any = document.createElement('li');
             li.draggable = true;
-            li.dataset.id = arr[parent_id][i].id;
-            li.innerHTML = arr[parent_id][i].category;
-            let dul: any = this.tree(arr, arr[parent_id][i].id);
+            li.dataset.id = arr[parentId][i].id;
+            li.innerHTML = arr[parentId][i].category;
+            let dul: any = this.tree(arr, arr[parentId][i].id);
             if (dul) {
                 dul.draggable = true;
                 dul.classList = 'child-ul';
@@ -344,10 +317,9 @@ class CreateList {
 /*let myClass = new CreateList(Data, Service, 'site');*/
 let service = new Service();
 let serviceStorage = new ServiceStorage()
-let adminClass = new CreateList(Data, service, serviceStorage,'admin');
+let adminClass = new CreateList(Data, service, serviceStorage, 'admin');
 
 /*let addItem = new AddItem(Service);*/
-
 
 
 toggleShow.addEvent(toggleShow.searchAllElements('.add'), 'click', function (e) {
